@@ -1,0 +1,847 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Tách Đường · Từ · Đến</title>
+<style>
+  :root {
+    --navy-900:#0B2545; --navy-700:#13315C; --ocean-600:#1E6091; --ocean-500:#2E86AB;
+    --ocean-100:#DEEAF6; --ocean-50:#F0F6FC; --bg:#F1F7E8; --surface:#fff; --border:#D7E0EA;
+    --text:#26384D; --muted:#5B6B80; --on-dark-muted:#9FB3C8;
+    --success:#146C43; --success-bg:#E6F5EE; --warning:#8A5A00; --warning-bg:#FEF5E0;
+    --danger:#A32B1F; --danger-bg:#FDECEA;
+    --radius:8px; --radius-card:14px;
+    --shadow:0 1px 2px rgba(11,37,69,.06), 0 8px 24px rgba(11,37,69,.08);
+    --font:"Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif;
+  }
+  *{box-sizing:border-box}
+  [hidden]{display:none !important}
+  html{scroll-behavior:smooth}
+  body{margin:0;background:var(--bg);color:var(--text);font:16px/1.5 var(--font)}
+  h1,h2,h3{color:var(--navy-900);margin:0}
+  h2{font-size:28px;line-height:1.25;letter-spacing:-.01em}
+  h3{font-size:20px;margin:24px 0 12px}
+  p{margin:0}
+  .muted{color:var(--muted)} small,.small{font-size:14px}
+  .sr-only,.visually-hidden{position:absolute;width:1px;height:1px;margin:-1px;padding:0;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0}
+  .skip{position:absolute;left:-999px;top:8px;background:#fff;padding:8px 12px;border-radius:var(--radius);z-index:10}
+  .skip:focus{left:8px}
+  :focus-visible{outline:3px solid var(--ocean-500);outline-offset:2px}
+
+  .topbar{background:var(--navy-900);color:#fff}
+  .topbar .in{max-width:1040px;margin:0 auto;padding:0 24px;height:72px;display:flex;align-items:center;gap:16px}
+  .logo{width:40px;height:40px;border-radius:10px;background:var(--ocean-500);display:grid;place-items:center;flex:none}
+  .logo svg{width:22px;height:22px;stroke:#fff;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+  .topbar .t{font-size:20px;font-weight:600;line-height:1.2}
+  .topbar .s{font-size:14px;color:var(--on-dark-muted)}
+
+  .status-strip{max-width:1040px;margin:16px auto 0;padding:0 24px}
+  .status-bar{display:flex;flex-wrap:wrap;gap:10px;padding:12px 16px;border:1px solid var(--border);background:rgba(255,255,255,.7);backdrop-filter:blur(8px);border-radius:12px;box-shadow:var(--shadow)}
+  .stat-chip{display:inline-flex;align-items:center;gap:8px;padding:6px 10px;border-radius:999px;background:var(--ocean-50);border:1px solid var(--ocean-100);color:var(--navy-700);font-size:13px;font-weight:600}
+  .stat-chip .dot{width:8px;height:8px;border-radius:50%;background:var(--ocean-600);display:inline-block}
+
+  .stepper-wrap{max-width:1040px;margin:0 auto;padding:24px 24px 0}
+  .stepper{list-style:none;margin:0;padding:0;display:flex;align-items:center}
+  .stepper li{display:flex;align-items:center;flex:1}
+  .stepper li:last-child{flex:none}
+  .stepper li:not(:last-child)::after{content:"";flex:1;height:2px;background:var(--border);margin:0 12px;border-radius:2px}
+  .stepper li.done:not(:last-child)::after{background:var(--ocean-600)}
+  .step-btn{display:flex;align-items:center;gap:12px;background:none;border:0;padding:4px;font:inherit;color:var(--muted);cursor:pointer;border-radius:var(--radius)}
+  .step-btn:disabled{cursor:default}
+  .dot{width:36px;height:36px;border-radius:50%;display:grid;place-items:center;border:2px solid var(--border);background:#fff;font-weight:600;flex:none;color:var(--muted)}
+  .dot svg{width:18px;height:18px;stroke:#fff;fill:none;stroke-width:3;stroke-linecap:round;stroke-linejoin:round}
+  .step-label{font-weight:600;white-space:nowrap}
+  li.current .dot{background:var(--ocean-600);border-color:var(--ocean-600);color:#fff}
+  li.current .step-label{color:var(--navy-900)}
+  li.done .dot{background:var(--ocean-600);border-color:var(--ocean-600)}
+  li.done .step-label{color:var(--ocean-600)}
+
+  main{max-width:1040px;margin:24px auto 48px;padding:0 24px}
+  .card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-card);box-shadow:var(--shadow);padding:32px}
+  .lead{color:var(--muted);margin:8px 0 24px}
+  .actions{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-top:32px;flex-wrap:wrap}
+  .actions .left{display:flex;gap:12px;flex-wrap:wrap}
+
+  .btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:44px;padding:0 20px;border-radius:var(--radius);border:1px solid transparent;font:600 16px var(--font);cursor:pointer;text-decoration:none;transition:background .15s,border-color .15s}
+  .btn svg{width:20px;height:20px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+  .btn svg.solid{fill:currentColor;stroke:none}
+  .btn.primary{background:var(--ocean-600);color:#fff}
+  .btn.primary:hover:not(:disabled):not([aria-disabled=true]){background:var(--ocean-500)}
+  .btn.secondary{background:#fff;color:var(--ocean-600);border-color:var(--ocean-600)}
+  .btn.secondary:hover:not(:disabled){background:var(--ocean-50)}
+  .btn.ghost{background:none;color:var(--muted)}
+  .btn.ghost:hover:not(:disabled){background:var(--ocean-50);color:var(--navy-900)}
+  .btn:disabled,.btn[aria-disabled=true]{opacity:.5;cursor:not-allowed}
+  .link{background:none;border:0;color:var(--ocean-600);font:600 14px var(--font);cursor:pointer;padding:4px 8px;border-radius:6px}
+  .link:hover{background:var(--ocean-50)}
+
+  .dropzone{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;text-align:center;padding:40px 24px;border:2px dashed var(--ocean-600);border-radius:var(--radius-card);background:var(--ocean-50);cursor:pointer;transition:background .15s,border-color .15s}
+  .dropzone svg{width:44px;height:44px;stroke:var(--ocean-600);fill:none;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
+  .dropzone strong{color:var(--navy-900);font-size:18px}
+  .dropzone:hover,.dropzone.over{background:var(--ocean-100);border-color:var(--navy-700)}
+  .dropzone:focus-within{outline:3px solid var(--ocean-500);outline-offset:2px}
+  .dropzone.busy{cursor:progress;opacity:.8}
+  .compact .dropzone{display:none}
+
+  .spinner{width:18px;height:18px;border:3px solid rgba(30,96,145,.25);border-top-color:var(--ocean-600);border-radius:50%;animation:spin .8s linear infinite;display:inline-block}
+  .btn .spinner{border-color:rgba(255,255,255,.4);border-top-color:#fff}
+  @keyframes spin{to{transform:rotate(360deg)}}
+
+  .filechip{display:flex;align-items:center;gap:12px;padding:12px 16px;border:1px solid var(--border);border-radius:var(--radius);background:#fff;flex-wrap:wrap}
+  .filechip svg{width:28px;height:28px;stroke:var(--ocean-600);fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;flex:none}
+  .filechip .name{font-weight:600;color:var(--navy-900);word-break:break-all}
+  .filechip .meta{color:var(--muted);font-size:14px}
+  .filechip .grow{flex:1;min-width:200px}
+  .field-label,label.lbl{display:block;font-weight:600;color:var(--navy-900);margin:24px 0 8px}
+  .tabs{display:flex;flex-wrap:wrap;gap:8px}
+  .tab{border:1px solid var(--border);background:#fff;color:var(--text);border-radius:999px;padding:6px 16px;font:600 14px var(--font);cursor:pointer}
+  .tab:hover{border-color:var(--ocean-600)}
+  .tab[aria-pressed=true]{background:var(--ocean-600);border-color:var(--ocean-600);color:#fff}
+
+  .alert{display:flex;gap:12px;align-items:flex-start;padding:12px 16px;border-radius:var(--radius);margin:16px 0;font-size:15px}
+  .alert svg{width:20px;height:20px;flex:none;margin-top:2px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+  .alert.info{background:var(--ocean-50);color:var(--navy-700);border:1px solid var(--ocean-100)}
+  .alert.success{background:var(--success-bg);color:var(--success)}
+  .alert.warning{background:var(--warning-bg);color:var(--warning)}
+  .alert.error{background:var(--danger-bg);color:var(--danger)}
+  .alert strong{font-weight:600}
+
+  .tablewrap{overflow:auto;border:1px solid var(--border);border-radius:var(--radius);max-height:420px;background:#fff}
+  table.data{border-collapse:collapse;width:100%;font-size:14px}
+  table.data th,table.data td{padding:8px 12px;border-bottom:1px solid var(--border);text-align:left;vertical-align:top}
+  table.data thead th{background:var(--ocean-100);color:var(--navy-900);position:sticky;top:0;white-space:nowrap;z-index:1}
+  table.data tbody tr:nth-child(even){background:#FAFCFE}
+  table.data td.hl,table.data th.hl{background:var(--ocean-100)}
+  table.data td.num{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+  table.data td.rowno{color:var(--muted);text-align:right;white-space:nowrap}
+  table.preview td{max-width:260px}
+  .badge{display:inline-block;padding:2px 10px;border-radius:999px;font-size:12px;font-weight:600;white-space:nowrap;background:var(--ocean-100);color:var(--navy-700)}
+  .badge.rule{background:var(--ocean-100);color:var(--navy-700)}
+  .badge.parent{background:#EDE7F6;color:#4527A0}
+  .badge.override{background:var(--warning-bg);color:var(--warning)}
+  .badge.ai{background:var(--success-bg);color:var(--success)}
+  .badge.keep{background:#ECEFF3;color:var(--muted)}
+
+  .summary{display:flex;flex-wrap:wrap;gap:8px 24px;padding:12px 16px;background:var(--ocean-50);border:1px solid var(--ocean-100);border-radius:var(--radius);margin-bottom:8px;font-size:15px}
+  .summary b{color:var(--navy-900)}
+  fieldset.plain{border:0;margin:0;padding:0;min-width:0}
+  fieldset.plain legend{padding:0}
+  .options{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+  .option{position:relative;display:block;cursor:pointer}
+  .option input{position:absolute;opacity:0;inset:0;margin:0;cursor:pointer;z-index:1}
+  .opt-body{display:flex;flex-direction:column;gap:4px;height:100%;padding:16px 16px 16px 60px;border:2px solid var(--border);border-radius:var(--radius-card);background:#fff;position:relative;transition:border-color .15s,background .15s}
+  .opt-body svg{position:absolute;left:16px;top:16px;width:28px;height:28px;stroke:var(--ocean-600);fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+  .opt-body strong{color:var(--navy-900)}
+  .option input:checked + .opt-body{border-color:var(--ocean-600);background:var(--ocean-50)}
+  .option input:focus-visible + .opt-body{outline:3px solid var(--ocean-500);outline-offset:2px}
+  .option input:disabled + .opt-body{opacity:.6;cursor:not-allowed}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:8px}
+  .field label{display:block;font-weight:600;color:var(--navy-900);margin:16px 0 8px}
+  .field .hint{display:block;color:var(--muted);font-size:13px;margin-top:6px}
+  input[type=text],select{width:100%;min-height:44px;padding:8px 12px;border:1px solid #B8C6D6;border-radius:var(--radius);font:16px var(--font);color:var(--text);background:#fff}
+  input[type=text]:disabled,select:disabled{background:#ECEFF3;color:var(--muted)}
+  .checks{margin-top:16px;display:flex;flex-direction:column;gap:12px}
+  .check{display:flex;gap:12px;align-items:flex-start;cursor:pointer}
+  .check input{width:20px;height:20px;margin:2px 0 0;accent-color:var(--ocean-600);flex:none}
+  .check.disabled{opacity:.6;cursor:not-allowed}
+
+  .run{margin-top:24px;padding:16px;border:1px solid var(--border);border-radius:var(--radius);background:#fff}
+  .bar{height:12px;border-radius:999px;background:var(--ocean-100);overflow:hidden}
+  .bar > i{display:block;height:100%;width:0;background:var(--ocean-600);border-radius:999px;transition:width .25s}
+  .run .row{display:flex;justify-content:space-between;gap:12px;margin-top:8px;font-size:14px;flex-wrap:wrap}
+  .log{margin:12px 0 0;padding:12px;background:#0B2545;color:#DCE8F5;border-radius:var(--radius);font:13px/1.6 Consolas,"Courier New",monospace;max-height:180px;overflow:auto;white-space:pre-wrap}
+
+  .stats{display:grid;grid-template-columns:repeat(6,1fr);gap:12px;margin:16px 0}
+  .stat{padding:16px;border:1px solid var(--border);border-radius:var(--radius);background:#fff}
+  .stat .v{font-size:28px;font-weight:700;color:var(--navy-900);line-height:1.1;font-variant-numeric:tabular-nums}
+  .stat .l{font-size:13px;color:var(--muted);margin-top:4px}
+  .stat.accent{background:var(--ocean-50);border-color:var(--ocean-100)}
+  details.quick,details.more{margin-top:32px;border-top:1px solid var(--border);padding-top:16px}
+  details summary{cursor:pointer;font-weight:600;color:var(--ocean-600);border-radius:6px;padding:4px 0}
+  .quick .qrow{display:flex;gap:12px;margin-top:12px}
+  .quick .qrow input{flex:1}
+  .qres{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:12px}
+  .qres div{background:var(--ocean-50);border:1px solid var(--ocean-100);border-radius:var(--radius);padding:8px 12px;font-size:14px;word-break:break-word}
+  .qres small{display:block;color:var(--muted)}
+  ul.plain{margin:8px 0 0;padding-left:20px}
+  footer{max-width:1040px;margin:0 auto;padding:0 24px 32px;color:var(--muted);font-size:13px}
+
+  @media (max-width:880px){
+    .card{padding:24px}
+    .options,.grid2{grid-template-columns:1fr}
+    .qres{grid-template-columns:1fr}
+    .stats{grid-template-columns:repeat(3,1fr)}
+  }
+  @media (max-width:560px){
+    .topbar .in{height:64px;padding:0 16px}
+    .topbar .s{display:none}
+    .stepper-wrap{padding:16px 16px 0}
+    .stepper li:not(.current) .step-label{display:none}
+    .stepper li:not(:last-child)::after{margin:0 6px}
+    main{padding:0 16px}
+    .card{padding:20px}
+    h2{font-size:24px}
+    .actions{flex-direction:column-reverse;align-items:stretch}
+    .actions .left{flex-direction:column}
+    .btn{width:100%}
+    .stats{grid-template-columns:repeat(2,1fr)}
+    .quick .qrow{flex-direction:column}
+  }
+  @media (prefers-reduced-motion:reduce){*{transition:none !important;animation-duration:.01ms !important;scroll-behavior:auto !important}}
+
+
+  /* Giao diện nâng cấp: giữ nguyên ID, API và logic xử lý hiện có */
+  :root {
+    --navy-900:#10233f; --navy-700:#1a3a61; --ocean-600:#1769aa; --ocean-500:#2789cf;
+    --ocean-100:#dceeff; --ocean-50:#f2f8ff; --bg:#F1F7E8; --surface:#fff; --border:#dce5ef;
+    --text:#23364d; --muted:#61738a; --on-dark-muted:#b4c8df;
+    --success:#14744a; --success-bg:#e8f7ef; --warning:#8a5b08; --warning-bg:#fff5df;
+    --danger:#a92f36; --danger-bg:#fff0f0;
+    --radius:12px; --radius-card:20px;
+    --shadow:0 2px 5px rgba(16,35,63,.035),0 14px 36px rgba(16,35,63,.075);
+  }
+  body {
+    background:radial-gradient(ellipse at 8% 0%,rgba(39,137,207,.10),transparent 28rem),
+               radial-gradient(ellipse at 100% 18%,rgba(30,96,145,.07),transparent 25rem),var(--bg);
+    color:var(--text); line-height:1.6;
+  }
+  .topbar{background:linear-gradient(115deg,#263d32 0%,#3b6045 58%,#58794e 100%);position:relative;overflow:hidden}
+  .topbar:after{content:"";position:absolute;width:330px;height:330px;border:1px solid rgba(255,255,255,.10);border-radius:50%;right:8%;top:-230px;box-shadow:0 0 0 35px rgba(255,255,255,.025),0 0 0 75px rgba(255,255,255,.02);pointer-events:none}
+  .topbar .in{max-width:1180px;height:76px;position:relative;z-index:1}
+  .logo{width:44px;height:44px;border-radius:14px;background:linear-gradient(145deg,#79b983,#477451);box-shadow:0 7px 18px rgba(0,0,0,.17);border:1px solid rgba(255,255,255,.28)}
+  .topbar .t{font-size:19px;letter-spacing:-.025em;font-weight:700}
+  .topbar .s{margin-top:4px;font-size:13px;letter-spacing:.01em;color:#d6e4d5}
+  .status-strip{max-width:1180px;margin:18px auto 0}
+  .status-bar{gap:9px;padding:11px 14px;background:rgba(255,255,255,.82);border-color:rgba(208,221,235,.9);border-radius:14px;box-shadow:0 5px 18px rgba(16,35,63,.04)}
+  .stat-chip{padding:6px 11px;background:#f4f8fd;border-color:#e2ebf5;font-size:12px;letter-spacing:.005em}
+  .stat-chip .dot{background:#2789cf;box-shadow:0 0 0 3px rgba(39,137,207,.12)}
+  .hero-intro{max-width:1132px;margin:22px auto 0;padding:30px 34px;min-height:255px;display:grid;grid-template-columns:minmax(0,1.35fr) minmax(300px,.8fr);align-items:center;gap:28px;position:relative;overflow:hidden;border:1px solid #dbe7f3;border-radius:24px;background:linear-gradient(120deg,#fff 0%,#f8fbff 65%,#edf6ff 100%);box-shadow:var(--shadow)}
+  .hero-copy{position:relative;z-index:1}
+  .hero-eyebrow{display:flex;align-items:center;gap:9px;font-size:11px;font-weight:800;letter-spacing:.13em;color:#1769aa;margin-bottom:13px}
+  .hero-pulse{width:8px;height:8px;background:#2b9bd6;border-radius:50%;box-shadow:0 0 0 4px #dff2ff}
+  .hero-intro h1{max-width:650px;font-size:clamp(27px,3.2vw,39px);line-height:1.14;letter-spacing:-.045em;color:#10233f;font-weight:800}
+  .hero-intro h1 span{display:block;color:#1769aa}
+  .hero-intro p{max-width:620px;color:#5d7087;font-size:15px;margin-top:14px;line-height:1.7}
+  .hero-points{display:flex;flex-wrap:wrap;gap:9px 18px;margin-top:20px;color:#405771;font-size:12px;font-weight:600}
+  .hero-points span{display:inline-flex;align-items:center;gap:7px}
+  .hero-points b{display:grid;place-items:center;width:23px;height:23px;border-radius:8px;background:#e3f2ff;color:#1769aa;font-size:10px}
+  .hero-visual{position:relative;min-height:190px;display:grid;place-items:center}
+  .visual-orbit{position:absolute;border:1px solid rgba(39,137,207,.17);border-radius:50%;aspect-ratio:1}
+  .orbit-one{width:235px}.orbit-two{width:185px;border-style:dashed}
+  .visual-sheet{width:min(100%,330px);position:relative;z-index:1;background:#fff;border:1px solid #d9e5f1;border-radius:13px;overflow:hidden;box-shadow:0 18px 38px rgba(30,75,120,.13);transform:rotate(-2deg)}
+  .sheet-top{height:31px;background:#f4f8fc;border-bottom:1px solid #e4edf6;display:flex;align-items:center;gap:5px;padding:0 10px}
+  .sheet-top i{width:6px;height:6px;border-radius:50%;background:#9db4cb}.sheet-top i:first-child{background:#f09b93}.sheet-top i:nth-child(2){background:#f0c36b}.sheet-top i:nth-child(3){background:#72c79b}
+  .sheet-top span{font-size:10px;color:#74869b;margin-left:5px}
+  .sheet-grid{display:grid;grid-template-columns:1.15fr 1fr 1.25fr 1fr;font-size:8px;color:#66798e}
+  .sheet-grid span{padding:8px 5px;border-right:1px solid #edf1f6;border-bottom:1px solid #edf1f6;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .sheet-grid .sheet-head{background:#eaf4ff;color:#244c76;font-weight:800}
+  .sheet-grid .sheet-mark{background:#f0f9f5;color:#23734d}
+  .hero-float{position:absolute;z-index:2;right:-3px;bottom:4px;display:flex;align-items:center;gap:9px;padding:10px 13px;background:rgba(255,255,255,.96);border:1px solid #dbe9e2;border-radius:13px;box-shadow:0 10px 25px rgba(20,70,50,.12)}
+  .float-check{width:27px;height:27px;display:grid;place-items:center;border-radius:9px;background:#e2f7eb;color:#16804e;font-weight:900}
+  .hero-float b,.hero-float small{display:block}.hero-float b{font-size:11px;color:#244b3b}.hero-float small{font-size:10px;color:#698375;margin-top:1px}
+  .stepper-wrap{max-width:1180px;padding-top:25px}
+  .stepper{padding:13px 20px;background:rgba(255,255,255,.78);border:1px solid var(--border);border-radius:16px;box-shadow:0 5px 18px rgba(16,35,63,.035)}
+  .stepper li:not(:last-child)::after{background:#dce6f0;height:3px}
+  .stepper li.done:not(:last-child)::after{background:#2789cf}
+  .dot{width:34px;height:34px;border-width:1px;background:#f8fafc}
+  main{max-width:1180px;margin:20px auto 52px}
+  .card{padding:34px;border-radius:22px;border-color:#dce6ef;box-shadow:0 12px 34px rgba(16,35,63,.065)}
+  .card h2{font-size:clamp(24px,2.6vw,31px);letter-spacing:-.035em;font-weight:800;display:flex;align-items:center;gap:12px}
+  .card h2:before{content:"";display:block;width:5px;height:30px;border-radius:5px;background:linear-gradient(#39a6e2,#1769aa);flex:none}
+  .lead{font-size:15px;max-width:850px;line-height:1.75;margin:10px 0 26px}
+  .dropzone{padding:44px 24px;border:2px dashed #9bc9ec;border-radius:18px;background:linear-gradient(145deg,#f5faff,#edf7ff);gap:10px}
+  .dropzone svg{width:48px;height:48px;padding:9px;border-radius:15px;background:#dcefff;stroke:#1769aa}
+  .dropzone strong{font-size:17px}
+  .dropzone:hover,.dropzone.over{background:#e5f3ff;border-color:#1769aa}
+  .filechip{padding:14px 16px;border-radius:13px;background:#fbfdff}
+  .btn{min-height:46px;padding:0 20px;border-radius:11px;font-size:14px;font-weight:700;box-shadow:0 2px 4px rgba(16,35,63,.035)}
+  .btn.primary{background:linear-gradient(135deg,#217fbd,#1769aa);box-shadow:0 5px 13px rgba(23,105,170,.18)}
+  .btn.primary:hover:not(:disabled):not([aria-disabled=true]){background:linear-gradient(135deg,#2c94d3,#1b5f9b);transform:translateY(-1px)}
+  .btn.secondary{border-color:#b9d8f0;color:#1769aa;background:#fff}
+  .btn.secondary:hover:not(:disabled){background:#eff8ff;border-color:#7db8e5}
+  .btn.ghost:hover:not(:disabled){background:#f0f5fa}
+  .tab{border-radius:10px;padding:8px 14px}
+  .tab[aria-pressed=true]{box-shadow:0 3px 9px rgba(23,105,170,.14)}
+  .options{gap:14px}
+  .opt-body{border-radius:16px;padding:19px 18px 19px 61px}
+  .option input:checked + .opt-body{box-shadow:0 4px 14px rgba(23,105,170,.08)}
+  .grid2{gap:20px}
+  input[type=text],select{border-color:#cbd7e4;border-radius:11px;min-height:46px}
+  input[type=text]:focus,select:focus{border-color:#2789cf;outline:3px solid rgba(39,137,207,.13)}
+  .alert{border-radius:12px;padding:13px 15px;line-height:1.6}
+  .tablewrap{border-radius:13px;border-color:#dce6ef;box-shadow:0 2px 8px rgba(16,35,63,.025)}
+  table.data th,table.data td{padding:10px 13px}
+  table.data thead th{background:#eaf4ff}
+  .summary{border-radius:12px;padding:13px 16px}
+  .run{border-radius:14px;background:#fbfdff;padding:18px}
+  .bar{height:10px}
+  .stats{gap:12px}
+  .stat{border-radius:14px;padding:17px;background:linear-gradient(145deg,#fff,#fbfdff)}
+  .stat .v{font-size:27px;letter-spacing:-.03em}
+  .stat.accent{background:linear-gradient(145deg,#eef7ff,#e4f2ff);border-color:#cfe6fa}
+  details.quick,details.more{border-color:#e0e8f0}
+  details summary{color:#1769aa;padding:7px 0}
+  .quick .qres div{border-radius:12px;padding:12px}
+  footer{max-width:1180px;padding-bottom:34px}
+  @media(max-width:880px){
+    .hero-intro{margin-left:24px;margin-right:24px;padding:25px;grid-template-columns:minmax(0,1.2fr) minmax(230px,.8fr);gap:12px}
+    .hero-visual{min-height:165px}.orbit-one{width:190px}.orbit-two{width:150px}
+    .hero-float{right:-5px;bottom:0}
+    .card{padding:25px}
+  }
+  @media(max-width:640px){
+    .topbar .in{height:66px;padding:0 16px}.topbar .t{font-size:16px}.topbar .s{font-size:12px}
+    .status-strip{margin:12px 16px 0;padding:0}.status-bar{padding:10px;gap:7px}.stat-chip{font-size:11px}
+    .hero-intro{margin:14px 16px 0;padding:23px 20px;grid-template-columns:1fr;gap:10px;border-radius:19px}
+    .hero-intro h1{font-size:29px}.hero-intro p{font-size:14px}.hero-points{gap:8px 12px}
+    .hero-visual{min-height:145px;margin-top:4px}.visual-sheet{max-width:300px}.orbit-one{width:190px}.orbit-two{width:150px}
+    .hero-float{right:0;bottom:-2px;padding:8px 10px}
+    .stepper-wrap{padding:16px 16px 0}.stepper{padding:10px 12px}
+    main{padding:0 16px;margin-top:16px}.card{padding:21px;border-radius:18px}
+    .card h2{font-size:24px}.card h2:before{height:25px}.lead{font-size:14px}
+    .dropzone{padding:32px 16px}.dropzone strong{font-size:15px}
+    .actions{gap:10px}.actions .left{gap:9px}
+    footer{padding:0 16px 28px}
+  }
+  @media(prefers-reduced-motion:reduce){.btn.primary:hover:not(:disabled){transform:none}}
+
+.hero-intro{max-width:1180px;min-height:0;margin:22px auto 20px;padding:28px 34px;grid-template-columns:1fr;border-radius:18px}
+.hero-intro h1{max-width:900px}
+.hero-intro p{max-width:760px}
+.hero-points{margin-top:16px}
+.workspace-layout{display:grid;grid-template-columns:260px minmax(0,1fr);align-items:start;gap:22px;max-width:1180px;margin:0 auto;padding:0 24px}
+.workspace-sidebar{position:sticky;top:20px;display:grid;gap:14px}
+.status-strip,.stepper-wrap{max-width:none;margin:0;padding:0}
+.status-bar{display:grid;gap:8px;padding:12px;background:#fff;border-radius:14px;box-shadow:0 5px 18px rgba(16,35,63,.04)}
+.stat-chip{justify-content:flex-start;border-radius:9px}
+.stepper{display:flex;flex-direction:column;align-items:stretch;gap:0;padding:16px;background:#fff;border:1px solid var(--border);border-radius:14px;box-shadow:0 5px 18px rgba(16,35,63,.04)}
+.stepper li{position:relative;display:block;flex:none;padding:0 0 20px}
+.stepper li:last-child{padding-bottom:0}
+.stepper li:not(:last-child)::after{position:absolute;left:16px;top:38px;width:2px;height:20px;margin:0;border-radius:2px}
+.step-btn{width:100%;gap:11px;text-align:left}
+.step-label{white-space:normal;font-size:14px}
+.sidebar-note{padding:16px;background:#fff;border:1px solid var(--border);border-radius:14px;color:var(--muted);font-size:13px}
+.sidebar-note strong{display:block;margin-bottom:5px;color:var(--navy-900);font-size:14px}
+.sidebar-note p{line-height:1.6}
+.workspace-layout main{width:100%;max-width:none;margin:0;padding:0}
+.workspace-layout .card{padding:30px}
+footer{max-width:1180px}
+@media(max-width:900px){
+  .workspace-layout{grid-template-columns:220px minmax(0,1fr);gap:16px;padding:0 18px}
+  .workspace-layout .card{padding:24px}
+  .hero-intro{margin-left:18px;margin-right:18px}
+}
+@media(max-width:720px){
+  .hero-intro{margin:16px 16px 14px;padding:22px 20px}
+  .workspace-layout{grid-template-columns:1fr;gap:14px;padding:0 16px}
+  .workspace-sidebar{position:static;grid-template-columns:minmax(0,1fr) minmax(0,1.4fr);align-items:stretch}
+  .status-bar{height:100%;align-content:center}
+  .stepper{height:100%;justify-content:center}
+  .stepper li:not(.current) .step-label{display:block}
+  .sidebar-note{display:none}
+  .workspace-layout .card{padding:22px}
+}
+@media(max-width:480px){
+  .workspace-sidebar{grid-template-columns:1fr}
+  .status-bar{display:flex;flex-wrap:wrap}
+  .stat-chip{font-size:11px}
+  .stepper{padding:12px}
+  .stepper li{padding-bottom:14px}
+  .stepper li:not(:last-child)::after{height:14px}
+  .hero-intro{padding:20px 18px}
+  .hero-intro h1{font-size:26px}
+  .workspace-layout .card{padding:19px}
+}
+
+  .logout-form{margin-left:auto;position:relative;z-index:2}.logout-btn{min-height:38px;padding:0 14px;border:1px solid rgba(255,255,255,.55);border-radius:10px;background:rgba(255,255,255,.10);color:#fff;font:600 14px var(--font);cursor:pointer}.logout-btn:hover{background:rgba(255,255,255,.2)}
+  @media(max-width:560px){.logout-btn{font-size:12px;padding:0 9px}.topbar .in{gap:10px}}
+</style>
+</head>
+<body>
+<a class="skip" href="#main">Bỏ qua đến nội dung</a>
+
+<header class="topbar"><div class="in">
+  <div class="logo" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M9 4v16M15 4v16"/></svg></div>
+  <div><div class="t">Tách Đường · Từ · Đến</div><div class="s">Phân tích bảng giá đất theo dữ liệu thực tế</div></div>
+  <form class="logout-form" action="/logout" method="post"><button class="logout-btn" type="submit">Đăng xuất</button></form>
+</div></header>
+
+<section class="hero-intro" aria-label="Giới thiệu công cụ">
+  <div class="hero-copy">
+    <div class="hero-eyebrow"><span class="hero-pulse"></span> CÔNG CỤ XỬ LÝ DỮ LIỆU EXCEL</div>
+    <h1>Chuẩn hóa mô tả tuyến đường <span>nhanh và nhất quán</span></h1>
+    <p>Tải bảng Excel lên, kiểm tra dữ liệu mẫu, chọn cách xử lý và tải tệp kết quả. Các bước được tách rõ để bạn dễ kiểm tra trước khi xuất dữ liệu.</p>
+    <div class="hero-points"><span><b>01</b> Tải tệp .xlsx</span><span><b>02</b> Chọn cách tách</span><span><b>03</b> Kiểm tra kết quả</span></div>
+  </div>
+  <div class="hero-visual" aria-hidden="true">
+    <div class="visual-orbit orbit-one"></div><div class="visual-orbit orbit-two"></div>
+    <div class="visual-sheet">
+      <div class="sheet-top"><i></i><i></i><i></i><span>du_lieu.xlsx</span></div>
+      <div class="sheet-grid"><span class="sheet-head">Tên đường</span><span class="sheet-head">Đường</span><span class="sheet-head">Từ</span><span class="sheet-head">Đến</span><span>Quốc lộ 21B...</span><span class="sheet-mark">QL 21B</span><span class="sheet-mark">Cầu Thạch Bích</span><span class="sheet-mark">Ngã ba...</span><span>Đường liên xã...</span><span class="sheet-mark">Liên xã</span><span class="sheet-mark">UBND xã</span><span class="sheet-mark">Trường học</span></div>
+    </div>
+    <div class="hero-float"><span class="float-check">✓</span><span><b>Dữ liệu có cấu trúc</b><small>Đường · Từ · Đến</small></span></div>
+  </div>
+</section>
+
+<div class="workspace-layout">
+  <aside class="workspace-sidebar" aria-label="Tiến trình và thông tin">
+    <div class="status-strip">
+      <div class="status-bar" aria-label="Thông tin nhanh">
+        <span class="stat-chip"><span class="dot"></span> Đầu vào: file Excel .xlsx</span>
+        <span class="stat-chip"><span class="dot"></span> Kết quả: 3 cột Đường / Từ / Đến</span>
+        <span class="stat-chip"><span class="dot"></span> Tối đa: <span id="maxMb">20</span> MB</span>
+      </div>
+    </div>
+
+    <nav class="stepper-wrap" aria-label="Các bước thực hiện">
+      <ol class="stepper" id="stepper">
+        <li data-step="1"><button class="step-btn" type="button"><span class="dot">1</span><span class="step-label">Tải dữ liệu</span></button></li>
+        <li data-step="2"><button class="step-btn" type="button"><span class="dot">2</span><span class="step-label">Chạy phân tích</span></button></li>
+        <li data-step="3"><button class="step-btn" type="button"><span class="dot">3</span><span class="step-label">Kết quả</span></button></li>
+      </ol>
+    </nav>
+
+    <div class="sidebar-note">
+      <strong>Quy trình đơn giản</strong>
+      <p>Tải tệp Excel, kiểm tra dữ liệu rồi tải kết quả đã tách cột.</p>
+    </div>
+  </aside>
+
+  <main id="main">
+  <!-- BƯỚC 1 -->
+  <section id="step1" class="card" aria-labelledby="t1">
+    <h2 id="t1" tabindex="-1">Tải dữ liệu gốc lên</h2>
+    <p class="lead">Đưa file Excel chứa bảng giá đất vào hệ thống. Hệ thống tự nhận diện sheet, dò cột “Tên đường”, và hiển thị bản xem trước trước khi xử lý.</p>
+    <div id="s1body">
+      <label class="dropzone" id="drop" for="file">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 18a4 4 0 0 1-.5-7.97A5.5 5.5 0 0 1 17 8.5a4.5 4.5 0 0 1 .5 8.97"/><path d="M12 12v8M9 15l3-3 3 3"/></svg>
+        <strong id="dropTitle">Kéo thả tệp .xlsx vào đây hoặc bấm để chọn</strong>
+        <span class="muted small" id="dropHint">Chỉ nhận định dạng .xlsx</span>
+      </label>
+      <input class="visually-hidden" type="file" id="file" accept=".xlsx">
+      <div id="uploadError" class="alert error" role="alert" hidden></div>
+      <div id="uploaded" hidden>
+        <div class="filechip">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5"/></svg>
+          <div class="grow"><div class="name" id="fName"></div><div class="meta" id="fMeta"></div></div>
+          <button class="link" type="button" id="changeFile">Đổi tệp</button>
+        </div>
+        <div class="field-label" id="sheetLbl">Chọn sheet</div>
+        <div class="tabs" id="sheetTabs" role="group" aria-labelledby="sheetLbl"></div>
+        <div id="detectNote"></div>
+        <div class="tablewrap" tabindex="0" aria-label="Bảng xem trước dữ liệu"><table class="data preview" id="previewTable"></table></div>
+        <p class="muted small" id="previewNote" style="margin-top:8px"></p>
+      </div>
+    </div>
+    <div class="actions"><span></span>
+      <button class="btn primary" type="button" id="to2" disabled>Tiếp tục <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></button>
+    </div>
+  </section>
+
+  <!-- BƯỚC 2 -->
+  <section id="step2" class="card" aria-labelledby="t2" hidden>
+    <h2 id="t2" tabindex="-1">Chạy phân tích</h2>
+    <p class="lead">Chọn chế độ xuất dữ liệu phù hợp với file đang dùng, sau đó bắt đầu phân tích. Mặc định đã được thiết lập để tương thích với dữ liệu bảng giá Thanh Oai.</p>
+    <div class="summary" id="summary"></div>
+    <fieldset class="plain" id="formArea">
+      <legend class="field-label">Chế độ xử lý</legend>
+      <div class="options">
+        <label class="option"><input type="radio" name="mode" value="add-columns" checked>
+          <span class="opt-body"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M9 4v16M15 4v16"/></svg>
+            <strong>Thêm 3 cột vào tệp gốc</strong><span class="muted small">Ghi Đường / Từ / Đến ngay cạnh cột tên đường. Dùng được cho mọi tệp Excel.</span></span></label>
+        <label class="option"><input type="radio" name="mode" value="price-table">
+          <span class="opt-body"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 10h18M3 15h18"/></svg>
+            <strong>Bảng đối chiếu giá</strong><span class="muted small">Mỗi mức giá một dòng, đúng định dạng tệp mẫu của bảng giá Thanh Oai.</span></span></label>
+      </div>
+      <div class="grid2">
+        <div class="field"><label for="column">Cột chứa tên đường</label>
+          <input type="text" id="column" autocomplete="off" spellcheck="false">
+          <span class="hint" id="columnHint">Chữ cái của cột (ví dụ B) hoặc một từ trong tiêu đề (ví dụ Tên đường).</span></div>
+        <div class="field"><label for="order">Thứ tự cột địa chỉ</label>
+          <select id="order"><option value="duong-tu-den">Đường → Từ → Đến</option><option value="tu-den-duong">Từ → Đến → Đường</option></select></div>
+      </div>
+      <div class="checks">
+        <label class="check" id="hideRow"><input type="checkbox" id="hideSource"><span>Ẩn cột gốc sau khi tách <small class="muted">(dữ liệu vẫn còn, bỏ ẩn là thấy lại)</small></span></label>
+        <label class="check disabled" id="aiRow"><input type="checkbox" id="useAi" disabled><span>Dùng AI (Gemini) cho câu quy tắc không tách được <small class="muted" id="aiHint"></small></span></label>
+      </div>
+    </fieldset>
+
+    <div class="run" id="runPanel" hidden>
+      <div class="bar" role="progressbar" id="bar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" aria-label="Tiến độ phân tích"><i id="barFill"></i></div>
+      <div class="row"><span id="runMsg" class="muted">Đang chuẩn bị</span><b id="runPct">0%</b></div>
+      <pre class="log" id="log" aria-label="Nhật ký xử lý"></pre>
+    </div>
+    <div id="runError" class="alert error" role="alert" hidden></div>
+
+    <div class="actions">
+      <button class="btn secondary" type="button" id="back1"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M19 12H5M11 6l-6 6 6 6"/></svg> Quay lại</button>
+      <button class="btn primary" type="button" id="run"><svg class="solid" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5l11 7-11 7z"/></svg><span id="runLabel">Bắt đầu phân tích</span></button>
+    </div>
+
+    <details class="quick">
+      <summary>Thử nhanh một câu</summary>
+      <p class="muted small" style="margin-top:8px">Dán một câu tên đường để xem nó được tách ra sao, không cần tệp.</p>
+      <div class="qrow">
+        <input type="text" id="quickText" aria-label="Câu cần tách" value="Quốc lộ 21B: Đoạn từ cầu Thạch Bích đến ngã ba giao cắt với đường bệnh viện Thanh Oai">
+        <button class="btn secondary" type="button" id="quickBtn">Tách thử</button>
+      </div>
+      <div class="qres" id="quickRes" hidden>
+        <div><small>Đường</small><span id="qD"></span></div><div><small>Từ</small><span id="qT"></span></div><div><small>Đến</small><span id="qE"></span></div>
+      </div>
+      <div id="quickNote" class="muted small" style="margin-top:8px" role="status"></div>
+    </details>
+  </section>
+
+  <!-- BƯỚC 3 -->
+  <section id="step3" class="card" aria-labelledby="t3" hidden>
+    <h2 id="t3" tabindex="-1">Kết quả đầu ra</h2>
+    <div class="alert success" id="doneAlert" role="status"></div>
+    <div class="stats" id="stats"></div>
+    <div id="whereNote"></div>
+    <div id="warnBox"></div>
+    <h3>Xem trước kết quả</h3>
+    <div class="tablewrap" tabindex="0" aria-label="Bảng xem trước kết quả"><table class="data" id="resultTable"></table></div>
+    <p class="muted small" id="resultNote" style="margin-top:8px"></p>
+    <details class="more" id="unresolvedBox" hidden>
+      <summary>Các câu được giữ nguyên (không có mô tả đoạn)</summary>
+      <ul class="plain" id="unresolvedList"></ul>
+    </details>
+    <div class="actions">
+      <div class="left">
+        <button class="btn ghost" type="button" id="restart">Xử lý tệp khác</button>
+        <button class="btn secondary" type="button" id="rerun">Chạy lại với cài đặt khác</button>
+      </div>
+      <a class="btn primary" id="download" href="#" download><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4v11M7 11l5 5 5-5M5 20h14"/></svg> Tải tệp Excel kết quả</a>
+    </div>
+  </section>
+  </main>
+</div>
+
+<footer>Tệp tải lên được lưu tạm trên máy chủ và tự xoá sau <span id="ttl">60</span> phút.</footer>
+<div class="sr-only" id="live" aria-live="polite"></div>
+
+<script>
+(() => {
+  "use strict";
+  const $ = (id) => document.getElementById(id);
+  const ICON_CHECK = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 13l4 4L19 7"/></svg>';
+  const ICON_INFO = '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 8h.01"/></svg>';
+  const ICON_WARN = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l10 18H2z"/><path d="M12 10v5M12 18h.01"/></svg>';
+  const SOURCE_CLASS = { "Quy tắc": "rule", "Kế thừa khu vực": "parent", "Đã đối chiếu": "override", "AI (Gemini)": "ai", "Giữ nguyên": "keep" };
+
+  const state = { health: { ai_enabled: false, max_upload_mb: 20 }, upload: null, sheet: "", column: "", job: null, running: false, step: 1 };
+  let pollToken = 0;
+
+  // ------------------------------------------------------------ tiện ích
+  function el(tag, attrs, ...kids) {
+    const n = document.createElement(tag);
+    for (const [k, v] of Object.entries(attrs || {})) {
+      if (k === "class") n.className = v; else if (k === "text") n.textContent = v; else n.setAttribute(k, v);
+    }
+    for (const kid of kids) if (kid != null) n.append(kid);
+    return n;
+  }
+  function alertBox(kind, text, strongText) {
+    const icon = { info: ICON_INFO, success: ICON_CHECK, warning: ICON_WARN, error: ICON_WARN }[kind];
+    const box = el("div", { class: "alert " + kind });
+    box.insertAdjacentHTML("afterbegin", icon);
+    const body = el("div");
+    if (strongText) body.append(el("strong", { text: strongText }), " ");
+    body.append(text);
+    box.append(body);
+    return box;
+  }
+  const announce = (msg) => { $("live").textContent = ""; setTimeout(() => { $("live").textContent = msg; }, 30); };
+  const fmtNum = (n) => Number(n).toLocaleString("vi-VN");
+  function fmtSize(b) {
+    if (b < 1024) return b + " B";
+    if (b < 1048576) return Math.round(b / 1024) + " KB";
+    return (b / 1048576).toLocaleString("vi-VN", { maximumFractionDigits: 1 }) + " MB";
+  }
+  async function api(url, opts) {
+    let res;
+    try { res = await fetch(url, opts); } catch (e) { throw new Error("Không kết nối được tới máy chủ. Hãy kiểm tra máy chủ còn chạy không."); }
+    let data = null;
+    try { data = await res.json(); } catch (e) { /* không phải JSON */ }
+    if (!res.ok) {
+      const d = data && data.detail;
+      throw new Error(typeof d === "string" ? d : "Dữ liệu gửi lên chưa hợp lệ (mã " + res.status + ").");
+    }
+    return data;
+  }
+  function buildTable(table, columns, rows, opts = {}) {
+    table.replaceChildren();
+    const head = el("tr");
+    columns.forEach((c, i) => head.append(el("th", { scope: "col", class: opts.highlight === c ? "hl" : "", text: c })));
+    table.append(el("thead", {}, head));
+    const body = el("tbody");
+    rows.forEach((r) => {
+      const tr = el("tr");
+      r.forEach((v, i) => {
+        const name = columns[i];
+        const td = el("td");
+        if (opts.badgeCol === name) {
+          td.append(el("span", { class: "badge " + (SOURCE_CLASS[v] || ""), text: v }));
+        } else {
+          td.textContent = v;
+          if (opts.highlight === name) td.className = "hl";
+          if (name === "Đơn giá (đồng)") td.className = "num";
+          if (name === "Dòng" || name === "Dòng nguồn") td.className = "rowno";
+        }
+        tr.append(td);
+      });
+      body.append(tr);
+    });
+    table.append(body);
+  }
+
+  // ------------------------------------------------------------ chuyển bước
+  function canGo(n) { return n === 1 || (n === 2 && !!state.upload) || (n === 3 && !!state.job && state.job.status === "done"); }
+  function renderStepper() {
+    document.querySelectorAll("#stepper li").forEach((li) => {
+      const n = Number(li.dataset.step), btn = li.querySelector("button"), dot = li.querySelector(".dot");
+      li.classList.toggle("current", n === state.step);
+      li.classList.toggle("done", n < state.step);
+      if (n === state.step) btn.setAttribute("aria-current", "step"); else btn.removeAttribute("aria-current");
+      btn.disabled = state.running || !canGo(n) || n === state.step;
+      if (n < state.step) dot.innerHTML = ICON_CHECK; else dot.textContent = String(n);
+    });
+  }
+  function go(n, focus = true) {
+    state.step = n;
+    [1, 2, 3].forEach((i) => { $("step" + i).hidden = i !== n; });
+    renderStepper();
+    if (focus) { $("t" + n).focus({ preventScroll: true }); window.scrollTo({ top: 0 }); }
+  }
+  document.querySelectorAll("#stepper button").forEach((b) => b.addEventListener("click", () => {
+    const n = Number(b.closest("li").dataset.step);
+    if (canGo(n) && !state.running) go(n);
+  }));
+
+  // ------------------------------------------------------------ bước 1
+  function showUploadError(msg) { const b = $("uploadError"); b.hidden = !msg; b.replaceChildren(); if (msg) b.append(msg); }
+  function setBusy(busy) {
+    $("drop").classList.toggle("busy", busy);
+    $("file").disabled = busy;
+    if (busy) { $("dropTitle").textContent = "Đang tải lên và đọc tệp..."; $("dropHint").textContent = "Vui lòng chờ trong giây lát"; }
+    else { $("dropTitle").textContent = "Kéo thả tệp .xlsx vào đây hoặc bấm để chọn"; $("dropHint").textContent = "Chỉ nhận định dạng .xlsx"; }
+  }
+  function renderUploaded() {
+    const u = state.upload;
+    $("uploaded").hidden = false;
+    $("s1body").classList.add("compact");
+    $("fName").textContent = u.filename;
+    $("fMeta").textContent = fmtSize(u.size) + " · " + u.sheets.length + " sheet";
+    const tabs = $("sheetTabs");
+    tabs.replaceChildren();
+    u.sheets.forEach((s) => {
+      const b = el("button", { type: "button", class: "tab", "aria-pressed": String(s.name === state.sheet), text: s.name });
+      b.addEventListener("click", () => switchSheet(s.name));
+      tabs.append(b);
+    });
+    renderPreview(u.preview, u.detected);
+    $("to2").disabled = false;
+  }
+  function renderPreview(pv, det) {
+    const note = $("detectNote");
+    note.replaceChildren();
+    if (det.found) note.append(alertBox("success", "ở sheet «" + det.sheet + "».", "Đã nhận diện cột " + det.column + " «" + det.header + "»"));
+    else note.append(alertBox("warning", "Bạn có thể nhập chữ cái cột ở bước sau, hoặc chọn sheet khác.", "Chưa tìm thấy cột có tiêu đề «Tên đường» ở sheet này."));
+    buildTable($("previewTable"), pv.columns, pv.rows, {});
+    // tô cột được nhận diện
+    if (pv.highlight) {
+      const idx = pv.columns.indexOf(pv.highlight);
+      $("previewTable").querySelectorAll("tr").forEach((tr) => { const c = tr.children[idx]; if (c) c.classList.add("hl"); });
+    }
+    $("previewNote").textContent = "Hiển thị " + pv.rows.length + " dòng đầu của sheet «" + pv.sheet + "» (" + fmtNum(pv.total_rows) + " dòng).";
+  }
+  async function switchSheet(name) {
+    if (name === state.sheet) return;
+    try {
+      const j = await api("/api/preview?file_id=" + encodeURIComponent(state.upload.file_id) + "&sheet=" + encodeURIComponent(name));
+      state.sheet = name; state.column = j.detected.found ? j.detected.column : "";
+      state.upload.detected = j.detected; state.upload.preview = j.preview;
+      renderUploaded();
+      announce("Đã chọn sheet " + name);
+    } catch (e) { showUploadError(e.message); }
+  }
+  async function uploadFile(file) {
+    showUploadError("");
+    if (!file) return;
+    if (!file.name.toLowerCase().endsWith(".xlsx")) return showUploadError("Chỉ nhận tệp Excel định dạng .xlsx.");
+    if (file.size > state.health.max_upload_mb * 1048576) return showUploadError("Tệp lớn hơn giới hạn " + state.health.max_upload_mb + " MB.");
+    setBusy(true);
+    try {
+      const fd = new FormData(); fd.append("file", file);
+      const j = await api("/api/upload", { method: "POST", body: fd });
+      state.upload = j; state.job = null; state.sheet = j.detected.sheet; state.column = j.detected.found ? j.detected.column : "";
+      renderUploaded();
+      announce("Đã tải lên " + j.filename);
+    } catch (e) { showUploadError(e.message); state.upload = null; $("to2").disabled = true; }
+    setBusy(false);
+    $("file").value = "";
+    renderStepper();
+  }
+  $("file").addEventListener("change", (e) => uploadFile(e.target.files[0]));
+  ["dragenter", "dragover"].forEach((t) => $("drop").addEventListener(t, (e) => { e.preventDefault(); $("drop").classList.add("over"); }));
+  ["dragleave", "drop"].forEach((t) => $("drop").addEventListener(t, (e) => { e.preventDefault(); $("drop").classList.remove("over"); }));
+  $("drop").addEventListener("drop", (e) => uploadFile(e.dataTransfer.files[0]));
+  $("changeFile").addEventListener("click", () => { $("s1body").classList.remove("compact"); $("file").click(); });
+  $("to2").addEventListener("click", () => { prepareStep2(); go(2); });
+
+  // ------------------------------------------------------------ bước 2
+  const mode = () => document.querySelector("input[name=mode]:checked").value;
+  function syncModeFields() {
+    const price = mode() === "price-table";
+    $("column").disabled = price;
+    $("hideSource").disabled = price;
+    $("hideRow").classList.toggle("disabled", price);
+    $("columnHint").textContent = price ? "Chế độ này dùng đúng sheet «Bảng giá» và các cột giá của bảng Thanh Oai." :
+      "Chữ cái của cột (ví dụ B) hoặc một từ trong tiêu đề (ví dụ Tên đường).";
+  }
+  function prepareStep2() {
+    const u = state.upload;
+    $("summary").replaceChildren(
+      el("span", {}, "Tệp: ", el("b", { text: u.filename })),
+      el("span", {}, "Sheet: ", el("b", { text: state.sheet || "(tự chọn)" })),
+    );
+    $("column").value = state.column || "Tên đường";
+    $("runError").hidden = true;
+    syncModeFields();
+  }
+  document.querySelectorAll("input[name=mode]").forEach((r) => r.addEventListener("change", syncModeFields));
+  $("back1").addEventListener("click", () => { if (!state.running) go(1); });
+
+  function setRunning(on) {
+    state.running = on;
+    $("formArea").disabled = on;
+    $("run").disabled = on;
+    $("back1").disabled = on;
+    $("runLabel").textContent = on ? "Đang phân tích..." : "Bắt đầu phân tích";
+    const icon = $("run").querySelector("svg"); if (icon) icon.style.display = on ? "none" : "";
+    $("run").querySelector(".spinner")?.remove();
+    if (on) $("run").prepend(el("span", { class: "spinner", "aria-hidden": "true" }));
+    renderStepper();
+  }
+  let logCount = 0;
+  function renderProgress(st) {
+    $("barFill").style.width = st.percent + "%";
+    $("bar").setAttribute("aria-valuenow", String(st.percent));
+    $("runPct").textContent = st.percent + "%";
+    $("runMsg").textContent = st.message;
+    const log = $("log");
+    st.log.slice(logCount).forEach((line) => { log.append(line + "\n"); });
+    logCount = st.log.length;
+    log.scrollTop = log.scrollHeight;
+  }
+  const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+  async function startRun() {
+    if (state.running) return;
+    $("runError").hidden = true; $("runError").replaceChildren();
+    $("log").textContent = ""; logCount = 0; $("runPanel").hidden = false;
+    $("barFill").style.width = "0%"; $("runPct").textContent = "0%"; $("runMsg").textContent = "Đang gửi yêu cầu";
+    setRunning(true);
+    const token = ++pollToken;
+    try {
+      const body = {
+        file_id: state.upload.file_id, mode: mode(), sheet: state.sheet, column: $("column").value.trim() || "Tên đường",
+        order: $("order").value, use_ai: $("useAi").checked, hide_source: $("hideSource").checked,
+      };
+      const { job_id } = await api("/api/jobs", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) });
+      announce("Bắt đầu phân tích");
+      let st;
+      for (;;) {
+        st = await api("/api/jobs/" + job_id);
+        if (token !== pollToken) return;
+        renderProgress(st);
+        if (st.status === "done" || st.status === "error") break;
+        await sleep(350);
+      }
+      if (st.status === "error") throw new Error(st.error || "Phân tích thất bại.");
+      state.job = Object.assign({ id: job_id, mode: body.mode }, st);
+      setRunning(false);
+      announce("Phân tích xong");
+      renderResult();
+      go(3);
+    } catch (e) {
+      setRunning(false);
+      $("runError").replaceChildren(...alertBox("error", e.message, "Không phân tích được.").childNodes);
+      $("runError").hidden = false;
+      $("runLabel").textContent = "Thử lại";
+    }
+  }
+  $("run").addEventListener("click", startRun);
+
+  // thử nhanh một câu
+  $("quickBtn").addEventListener("click", async () => {
+    const text = $("quickText").value.trim(), note = $("quickNote");
+    note.textContent = "";
+    if (!text) { note.textContent = "Bạn chưa nhập câu nào."; return; }
+    $("quickBtn").disabled = true;
+    try {
+      const j = await api("/api/split-text", { method: "POST", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ text, use_ai: $("useAi").checked }) });
+      $("qD").textContent = j.duong || "—"; $("qT").textContent = j.tu || "—"; $("qE").textContent = j.den || "—";
+      $("quickRes").hidden = false;
+      if (j.source === "unresolved") note.textContent = "Quy tắc không thấy cụm “từ … đến …” nên giữ nguyên câu. Tick “Dùng AI” (khi máy chủ có key Gemini) để AI thử tách.";
+      else note.textContent = "Cách xử lý: " + ({ rule: "quy tắc", "rule-parent": "kế thừa khu vực", "verified-override": "đáp án đã đối chiếu", ai: "AI (Gemini)" }[j.source] || j.source) + ".";
+    } catch (e) { note.textContent = e.message; }
+    $("quickBtn").disabled = false;
+  });
+
+  // ------------------------------------------------------------ bước 3
+  function statCard(value, label, accent) {
+    return el("div", { class: "stat" + (accent ? " accent" : "") }, el("div", { class: "v", text: fmtNum(value) }), el("div", { class: "l", text: label }));
+  }
+  function renderResult() {
+    const j = state.job, s = j.stats, price = j.mode === "price-table";
+    $("doneAlert").replaceChildren(...alertBox("success", price
+      ? "Từ " + fmtNum(s.processed) + " dòng gốc tạo ra " + fmtNum(s.result_rows) + " dòng kết quả."
+      : "Đã tách " + fmtNum(s.processed) + " dòng trong sheet «" + s.sheet + "» (bỏ qua " + fmtNum(s.skipped) + " dòng tiêu đề nhóm).",
+      "Phân tích hoàn tất.").childNodes);
+    const cards = [price ? statCard(s.result_rows, "Dòng kết quả", true) : statCard(s.processed, "Dòng đã tách", true),
+      statCard(s.rule, "Quy tắc"), statCard(s.rule_parent, "Kế thừa khu vực"), statCard(s.verified_override, "Đã đối chiếu"),
+      statCard(s.ai, "AI (Gemini)"), statCard(s.unresolved, "Giữ nguyên")];
+    $("stats").replaceChildren(...cards);
+
+    const where = $("whereNote"); where.replaceChildren();
+    if (price) where.append(alertBox("info", "Tệp có một sheet «Đối chiếu giá», mỗi mức giá một dòng.", "Cách xem kết quả:"));
+    else if (s.placement === "after-source") where.append(alertBox("info", "Mở tệp Excel, sheet «" + s.sheet + "»: ba cột tô xanh nhạt nằm ngay sau cột " + s.column + " (từ cột " + s.first_new_column + ").", "Cách xem kết quả:"));
+    else where.append(alertBox("info", "Ba cột mới nằm ở cuối bảng, bắt đầu từ cột " + s.first_new_column + ".", "Cách xem kết quả:"));
+    const warn = $("warnBox"); warn.replaceChildren();
+    (j.warnings || []).forEach((w) => warn.append(alertBox("warning", w, "Lưu ý:")));
+
+    buildTable($("resultTable"), j.preview.columns, j.preview.rows, { badgeCol: "Cách xử lý" });
+    $("resultNote").textContent = "Hiển thị " + j.preview.rows.length + " trên " + fmtNum(j.preview.total) + " dòng. Toàn bộ kết quả nằm trong tệp Excel.";
+    const un = s.unresolved_samples || [];
+    $("unresolvedBox").hidden = un.length === 0;
+    $("unresolvedList").replaceChildren(...un.map((t) => el("li", { text: t })));
+    const dl = $("download");
+    dl.href = "/api/jobs/" + encodeURIComponent(j.id) + "/download";
+    dl.setAttribute("download", j.download_name || "ket_qua.xlsx");
+  }
+  $("restart").addEventListener("click", () => {
+    state.upload = null; state.job = null; state.sheet = ""; state.column = "";
+    $("uploaded").hidden = true; $("s1body").classList.remove("compact"); $("to2").disabled = true; showUploadError("");
+    $("runPanel").hidden = true; $("runLabel").textContent = "Bắt đầu phân tích";
+    go(1);
+  });
+  $("rerun").addEventListener("click", () => { $("runPanel").hidden = true; $("runLabel").textContent = "Bắt đầu phân tích"; prepareStep2(); go(2); });
+
+  // ------------------------------------------------------------ khởi động
+  (async () => {
+    try {
+      const h = await api("/api/health");
+      state.health = h;
+      $("maxMb").textContent = h.max_upload_mb;
+      $("ttl").textContent = h.session_ttl_minutes;
+      if (h.ai_enabled) { $("useAi").disabled = false; $("aiRow").classList.remove("disabled"); }
+      else $("aiHint").textContent = "(máy chủ chưa có API key Gemini)";
+    } catch (e) { showUploadError(e.message); }
+  })();
+  go(1, false);
+})();
+</script>
+</body>
+</html>

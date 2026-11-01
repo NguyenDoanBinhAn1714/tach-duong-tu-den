@@ -1,0 +1,6 @@
+pandas>=2.0
+openpyxl>=3.1
+
+# Tùy chọn — chỉ cần nếu muốn dùng thêm AI Gemini (miễn phí) cho các dòng khó.
+# Nếu không cài, công cụ vẫn chạy đúng (bỏ qua bước gọi AI).
+google-generativeai>=0.7

@@ -1,0 +1,19 @@
+services:
+  - type: web
+    name: tach-duong-tu-den
+    runtime: docker
+    plan: free
+    healthCheckPath: /api/health
+    envVars:
+      - key: APP_ENV
+        value: production
+      - key: APP_USERNAME
+        sync: false
+      - key: APP_PASSWORD
+        sync: false
+      - key: SESSION_SECRET
+        generateValue: true
+      - key: MAX_UPLOAD_MB
+        value: "20"
+      - key: SESSION_TTL_SECONDS
+        value: "3600"
